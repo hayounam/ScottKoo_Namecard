@@ -392,15 +392,19 @@
   }
 
   function saveVCard(e) {
+    const nameParts = e.name.trim().split(/\s+/);
+    const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+    const firstName = nameParts[0];
     const vcard = [
       'BEGIN:VCARD', 'VERSION:3.0',
       `FN:${e.name}`,
+      `N:${lastName};${firstName};;;`,
       e.title ? `TITLE:${e.title}` : '',
       e.email ? `EMAIL:${e.email}` : '',
-      e.phone ? `TEL:${e.phone}` : '',
+      e.phone ? `TEL;TYPE=CELL:${e.phone}` : '',
       'ORG:Scott Koo Realty',
       'END:VCARD'
-    ].filter(Boolean).join('\n');
+    ].filter(Boolean).join('\r\n');
 
     const blob = new Blob([vcard], { type: 'text/vcard' });
     const a = document.createElement('a');
