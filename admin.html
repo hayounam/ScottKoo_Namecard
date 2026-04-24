@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Scott Koo Realty</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #1a2f5a;
+      --navy-light: #243b6e;
+      --gold: #c9a84c;
+      --gold-light: #e8c96a;
+      --gray: #6b7280;
+      --gray-light: #f4f5f7;
+      --border: #e2e5ea;
+      --white: #ffffff;
+      --red: #dc2626;
+      --green: #16a34a;
+    }
+
+    body {
+      font-family: 'Raleway', sans-serif;
+      background: var(--gray-light);
+      min-height: 100vh;
+      color: var(--navy);
+    }
+
+    /* Top bar */
+    header {
+      background: var(--navy);
+      padding: 0 32px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    }
+
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold));
+    }
+
+    .header-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: var(--white);
+      letter-spacing: 0.02em;
+    }
+
+    .header-logo span { color: var(--gold-light); }
+
+    /* Password gate */
+    #gate {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 60px);
+      padding: 24px;
+    }
+
+    .gate-box {
+      background: var(--white);
+      border-radius: 14px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 360px;
+      box-shadow: 0 8px 32px rgba(26,47,90,0.12);
+      text-align: center;
+    }
+
+    .gate-box h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+    }
+
+    .gate-box p { font-size: 0.85rem; color: var(--gray); margin-bottom: 24px; }
+
+    /* Main layout */
+    #app { display: none; max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+
+    .page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      margin-bottom: 6px;
+    }
+
+    .page-sub { font-size: 0.85rem; color: var(--gray); margin-bottom: 28px; }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+
+    /* Panel */
+    .panel {
+      background: var(--white);
+      border-radius: 14px;
+      box-shadow: 0 2px 16px rgba(26,47,90,0.07);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .panel-head h3 { font-size: 0.95rem; font-weight: 700; letter-spacing: 0.02em; }
+
+    .panel-body { padding: 20px 22px; }
+
+    /* Employee list */
+    .emp-list { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+
+    .emp-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .emp-item:hover { background: var(--gray-light); }
+    .emp-item.active { background: #eef1f8; }
+
+    .emp-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--navy);
+      color: var(--gold-light);
+      font-family: 'Playfair Display', serif;
+      font-size: 0.95rem;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .emp-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    .emp-info { flex: 1; min-width: 0; }
+    .emp-name { font-size: 0.88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .emp-slug { font-size: 0.72rem; color: var(--gray); }
+
+    .emp-del {
+      background: none; border: none; cursor: pointer;
+      color: var(--gray); font-size: 1rem; padding: 4px 6px;
+      border-radius: 6px; line-height: 1;
+      transition: background 0.15s, color 0.15s;
+    }
+    .emp-del:hover { background: #fee2e2; color: var(--red); }
+
+    /* Form */
+    .form-grid { display: flex; flex-direction: column; gap: 16px; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field.full { grid-column: 1 / -1; }
+
+    label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gray); }
+
+    input[type=text], input[type=email], input[type=tel], input[type=password] {
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-family: 'Raleway', sans-serif;
+      font-size: 0.88rem;
+      color: var(--navy);
+      outline: none;
+      transition: border-color 0.2s;
+      background: var(--white);
+      width: 100%;
+    }
+
+    input:focus { border-color: var(--navy); }
+
+    /* Photo upload */
+    .photo-upload {
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      padding: 18px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+
+    .photo-upload:hover { border-color: var(--navy); background: #f8f9fc; }
+    .photo-upload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+
+    .photo-preview {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin: 0 auto 8px;
+      display: block;
+      border: 2px solid var(--gold);
+    }
+
+    .photo-placeholder {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: var(--gray-light);
+      margin: 0 auto 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+    }
+
+    .photo-hint { font-size: 0.75rem; color: var(--gray); }
+
+    /* Buttons */
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      font-family: 'Raleway', sans-serif;
+      font-size: 0.83rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary { background: var(--navy); color: var(--white); }
+    .btn-primary:hover { background: var(--navy-light); }
+
+    .btn-secondary { background: var(--gray-light); color: var(--navy); }
+    .btn-secondary:hover { background: var(--border); }
+
+    .btn-sm { padding: 7px 14px; font-size: 0.75rem; }
+
+    .form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      background: var(--navy);
+      color: var(--white);
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 999;
+    }
+
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success::before { content: '✓  '; color: var(--gold-light); }
+    .toast.error::before { content: '✕  '; color: #fca5a5; }
+
+    /* Card preview link */
+    .preview-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.75rem; color: var(--navy); font-weight: 600;
+      text-decoration: none; margin-top: 2px;
+    }
+    .preview-link:hover { color: var(--gold); }
+
+    .section-label {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--gray);
+      padding: 10px 0 6px;
+      border-top: 1px solid var(--border);
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-logo">Scott Koo <span>Realty</span> — Admin</div>
+</header>
+
+<!-- Password gate -->
+<div id="gate">
+  <div class="gate-box">
+    <h2>Admin Access</h2>
+    <p>Enter admin password to continue</p>
+    <div class="field" style="margin-bottom:14px">
+      <input type="password" id="pw-input" placeholder="Password" />
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="checkPW()">Enter</button>
+    <p id="pw-err" style="color:#dc2626;font-size:0.8rem;margin-top:10px;display:none">Wrong password</p>
+  </div>
+</div>
+
+<!-- App -->
+<div id="app">
+  <div class="page-title">Team Directory</div>
+  <div class="page-sub">Add, edit, or remove employee cards</div>
+
+  <div class="two-col">
+    <!-- Left: employee list -->
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Employees</h3>
+        <button class="btn btn-sm btn-primary" onclick="newEmployee()">+ Add</button>
+      </div>
+      <div class="panel-body">
+        <ul class="emp-list" id="emp-list">
+          <li style="font-size:0.85rem;color:var(--gray);padding:10px">Loading...</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Right: form -->
+    <div class="panel" id="form-panel">
+      <div class="panel-head">
+        <h3 id="form-title">Select an employee</h3>
+        <a class="preview-link" id="preview-link" href="#" target="_blank" style="display:none">
+          ↗ Preview card
+        </a>
+      </div>
+      <div class="panel-body" id="form-body">
+        <p style="font-size:0.85rem;color:var(--gray)">Select an employee from the list or click + Add.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const SUPABASE_URL = 'https://hxoytsomnidcmmgqtlhh.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4b3l0c29tbmlkY21tZ3F0bGhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNTM3MzcsImV4cCI6MjA5MjYyOTczN30.A4KhneX9j8woxF_f0hmLuAmMKARuzHQRSuPkhRkFMRQ';
+  const ADMIN_PW = 'scottkoo2024'; // ← 비번 바꿔도 됨
+
+  let employees = [];
+  let currentId = null;
+  let photoFile = null;
+
+  /* ── Auth ── */
+  function checkPW() {
+    const v = document.getElementById('pw-input').value;
+    if (v === ADMIN_PW) {
+      document.getElementById('gate').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      loadEmployees();
+    } else {
+      document.getElementById('pw-err').style.display = 'block';
+    }
+  }
+
+  document.getElementById('pw-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') checkPW();
+  });
+
+  /* ── API helpers ── */
+  const headers = {
+    apikey: SUPABASE_ANON,
+    Authorization: `Bearer ${SUPABASE_ANON}`,
+    'Content-Type': 'application/json',
+    Prefer: 'return=representation'
+  };
+
+  async function loadEmployees() {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/employees?select=*&order=name.asc`, { headers });
+    employees = await res.json();
+    renderList();
+  }
+
+  async function saveEmployee(data) {
+    if (currentId) {
+      await fetch(`${SUPABASE_URL}/rest/v1/employees?id=eq.${currentId}`, {
+        method: 'PATCH', headers, body: JSON.stringify(data)
+      });
+    } else {
+      await fetch(`${SUPABASE_URL}/rest/v1/employees`, {
+        method: 'POST', headers, body: JSON.stringify(data)
+      });
+    }
+  }
+
+  async function deleteEmployee(id) {
+    await fetch(`${SUPABASE_URL}/rest/v1/employees?id=eq.${id}`, { method: 'DELETE', headers });
+  }
+
+  async function uploadPhoto(file, slug) {
+    const ext = file.name.split('.').pop();
+    const path = `${slug}.${ext}`;
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/photos/${path}`, {
+      method: 'POST',
+      headers: { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}`, 'Content-Type': file.type, 'x-upsert': 'true' },
+      body: file
+    });
+    if (!res.ok) return null;
+    return `${SUPABASE_URL}/storage/v1/object/public/photos/${path}`;
+  }
+
+  /* ── Render list ── */
+  function renderList() {
+    const ul = document.getElementById('emp-list');
+    if (!employees.length) {
+      ul.innerHTML = `<li style="font-size:0.85rem;color:var(--gray);padding:10px">No employees yet.</li>`;
+      return;
+    }
+    ul.innerHTML = employees.map(e => `
+      <li class="emp-item ${e.id === currentId ? 'active' : ''}" onclick="selectEmployee(${e.id})">
+        <div class="emp-avatar">
+          ${e.photo_url ? `<img src="${e.photo_url}" alt="${e.name}" />` : e.name.charAt(0)}
+        </div>
+        <div class="emp-info">
+          <div class="emp-name">${e.name}</div>
+          <div class="emp-slug">?id=${e.slug}</div>
+        </div>
+        <button class="emp-del" onclick="event.stopPropagation();confirmDelete(${e.id},'${e.name}')" title="Delete">✕</button>
+      </li>
+    `).join('');
+  }
+
+  /* ── Select / New ── */
+  function selectEmployee(id) {
+    currentId = id;
+    photoFile = null;
+    const e = employees.find(x => x.id === id);
+    renderForm(e);
+    renderList();
+  }
+
+  function newEmployee() {
+    currentId = null;
+    photoFile = null;
+    renderForm(null);
+    renderList();
+  }
+
+  /* ── Form ── */
+  function renderForm(e) {
+    document.getElementById('form-title').textContent = e ? 'Edit Employee' : 'New Employee';
+
+    const previewLink = document.getElementById('preview-link');
+    if (e) {
+      previewLink.href = `card.html?id=${e.slug}`;
+      previewLink.style.display = 'inline-flex';
+    } else {
+      previewLink.style.display = 'none';
+    }
+
+    document.getElementById('form-body').innerHTML = `
+      <div class="form-grid">
+        <div class="field">
+          <label>Photo</label>
+          <div class="photo-upload" id="photo-wrap">
+            ${e && e.photo_url
+              ? `<img class="photo-preview" id="photo-preview" src="${e.photo_url}" alt="photo" />`
+              : `<div class="photo-placeholder" id="photo-preview">📷</div>`}
+            <div class="photo-hint">Click to upload photo</div>
+            <input type="file" accept="image/*" onchange="onPhotoChange(event)" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label>Full Name *</label>
+            <input type="text" id="f-name" value="${e ? e.name : ''}" placeholder="Jane Smith" />
+          </div>
+          <div class="field">
+            <label>URL Slug *</label>
+            <input type="text" id="f-slug" value="${e ? e.slug : ''}" placeholder="jane-smith" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Title / Role</label>
+          <input type="text" id="f-title" value="${e ? e.title || '' : ''}" placeholder="Real Estate Agent" />
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label>Email</label>
+            <input type="email" id="f-email" value="${e ? e.email || '' : ''}" placeholder="jane@scottkoo.com" />
+          </div>
+          <div class="field">
+            <label>Phone</label>
+            <input type="tel" id="f-phone" value="${e ? e.phone || '' : ''}" placeholder="(555) 000-0000" />
+          </div>
+        </div>
+
+        <div class="section-label">Social (optional)</div>
+
+        <div class="form-row">
+          <div class="field">
+            <label>LinkedIn URL</label>
+            <input type="text" id="f-linkedin" value="${e ? e.linkedin || '' : ''}" placeholder="https://linkedin.com/in/..." />
+          </div>
+          <div class="field">
+            <label>Instagram URL</label>
+            <input type="text" id="f-instagram" value="${e ? e.instagram || '' : ''}" placeholder="https://instagram.com/..." />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-secondary" onclick="newEmployee()">Cancel</button>
+          <button class="btn btn-primary" onclick="handleSave()">Save</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function onPhotoChange(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    photoFile = file;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const el = document.getElementById('photo-preview');
+      el.outerHTML = `<img class="photo-preview" id="photo-preview" src="${ev.target.result}" alt="preview" />`;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function handleSave() {
+    const name = document.getElementById('f-name').value.trim();
+    const slug = document.getElementById('f-slug').value.trim().toLowerCase().replace(/\s+/g, '-');
+    if (!name || !slug) { toast('Name and slug are required', 'error'); return; }
+
+    let photo_url = currentId ? (employees.find(e => e.id === currentId)?.photo_url || null) : null;
+
+    if (photoFile) {
+      const url = await uploadPhoto(photoFile, slug);
+      if (url) photo_url = url;
+    }
+
+    const data = {
+      name,
+      slug,
+      title: document.getElementById('f-title').value.trim() || null,
+      email: document.getElementById('f-email').value.trim() || null,
+      phone: document.getElementById('f-phone').value.trim() || null,
+      linkedin: document.getElementById('f-linkedin').value.trim() || null,
+      instagram: document.getElementById('f-instagram').value.trim() || null,
+      photo_url
+    };
+
+    await saveEmployee(data);
+    await loadEmployees();
+    toast(currentId ? 'Employee updated!' : 'Employee added!', 'success');
+
+    // select the saved one
+    const saved = employees.find(e => e.slug === slug);
+    if (saved) selectEmployee(saved.id);
+  }
+
+  async function confirmDelete(id, name) {
+    if (!confirm(`Delete ${name}?`)) return;
+    await deleteEmployee(id);
+    if (currentId === id) { currentId = null; document.getElementById('form-body').innerHTML = '<p style="font-size:0.85rem;color:var(--gray)">Select an employee from the list or click + Add.</p>'; }
+    await loadEmployees();
+    toast('Employee deleted', 'success');
+  }
+
+  /* ── Toast ── */
+  function toast(msg, type = 'success') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = `toast ${type} show`;
+    setTimeout(() => el.classList.remove('show'), 3000);
+  }
+</script>
+</body>
+</html>
