@@ -513,6 +513,11 @@
           </div>
         </div>
 
+        <div class="field">
+          <label>Facebook URL</label>
+          <input type="text" id="f-facebook" value="${e ? e.facebook || '' : ''}" placeholder="https://facebook.com/..." />
+        </div>
+
         <div class="form-actions">
           <button class="btn btn-secondary" onclick="newEmployee()">Cancel</button>
           <button class="btn btn-primary" onclick="handleSave()">Save</button>
@@ -553,6 +558,7 @@
       phone: document.getElementById('f-phone').value.trim() || null,
       linkedin: document.getElementById('f-linkedin').value.trim() || null,
       instagram: document.getElementById('f-instagram').value.trim() || null,
+      facebook: document.getElementById('f-facebook').value.trim() || null,
       photo_url
     };
 
