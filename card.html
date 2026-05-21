@@ -81,6 +81,9 @@
     .save-btn svg { width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
     .website-link { display:block; text-align:center; margin-top:14px; font-size:0.78rem; font-weight:600; color:var(--gray); text-decoration:none; letter-spacing:0.04em; transition:color 0.2s; }
     .website-link:hover { color:var(--navy); }
+    .address-link { display:flex; align-items:center; justify-content:center; gap:6px; margin-top:10px; font-size:0.75rem; font-weight:500; color:var(--gray); text-decoration:none; transition:color 0.2s; letter-spacing:0.02em; }
+    .address-link:hover { color:var(--navy); }
+    .address-link svg { width:13px; height:13px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
     .state-msg { text-align:center; padding:60px 20px; color:var(--gray); font-size:0.9rem; }
     .hidden { display:none !important; }
   </style>
@@ -114,6 +117,10 @@
         Save Contact
       </button>
       <a class="website-link" href="https://scottkoorealty.com" target="_blank">scottkoorealty.com</a>
+      <a class="address-link" href="https://maps.google.com/?q=5027+Mercer+St,+Montgomery,+AL+36116" target="_blank">
+        <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        5027 Mercer St, Montgomery, AL 36116
+      </a>
     </div>
   </div>
   <div class="state-msg hidden" id="error">Employee not found.</div>
